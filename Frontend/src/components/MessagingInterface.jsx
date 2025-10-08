@@ -252,7 +252,7 @@ const MessagingInterface = ({ selectedUser, onBack }) => {
   const messageGroups = groupMessagesByDate(filteredMessages);
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-white">
+    <div className="flex flex-col h-[92vh] bg-white">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
         <div className="flex items-center space-x-3">
@@ -328,7 +328,7 @@ const MessagingInterface = ({ selectedUser, onBack }) => {
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={messagesEndRef}>
         {searchQuery && (
           <div className="flex items-center justify-center py-2">
             <div className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
@@ -439,8 +439,6 @@ const MessagingInterface = ({ selectedUser, onBack }) => {
             </div>
           </div>
         )}
-        
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Message Input */}
