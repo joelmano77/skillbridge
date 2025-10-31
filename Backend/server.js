@@ -243,7 +243,7 @@ app.post('/api/auth/register', async (req, res) => {
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        error: 'Email already registered'
+        error: 'email already registered'
       });
     }
 

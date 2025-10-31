@@ -189,7 +189,7 @@ const AuthModal = ({ isOpen, onClose, type, onSwitchType, onAuthSuccess, initial
         setError(result.error || 'An error occurred. Please try again.')
       }
     } catch (err) {
-      setError('Network error. Please check your connection and try again.')
+      setError(err.message || 'Network error. Please check your connection and try again.')
       console.error('Auth error:', err)
     } finally {
       setIsLoading(false)

@@ -13,10 +13,10 @@ const MessagingInterface = ({ selectedUser, onBack }) => {
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   
-  const { 
-    messages, 
-    sendMessage, 
-    markMessagesAsRead, 
+  const {
+    messages,
+    sendMessage,
+    markMessagesAsRead,
     loadConversation,
     setTyping,
     isUserOnline,
@@ -25,7 +25,7 @@ const MessagingInterface = ({ selectedUser, onBack }) => {
     socket,
     isConnected,
     isAuthenticated,
-    updateMessageStatus 
+    updateMessageStatus
   } = useMessaging();
   const { user } = useAuth();
 
@@ -270,7 +270,7 @@ const MessagingInterface = ({ selectedUser, onBack }) => {
                 alt={selectedUser.name}
                 className="w-10 h-10 rounded-full object-cover"
               />
-              {isUserOnline(selectedUser._id) && (
+              {isUserOnline(String(selectedUser._id)) && (
                 <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
               )}
             </div>
@@ -278,7 +278,7 @@ const MessagingInterface = ({ selectedUser, onBack }) => {
             <div>
               <h2 className="font-semibold text-gray-900">{selectedUser.name}</h2>
               <p className="text-sm text-gray-500">
-                {isUserOnline(selectedUser._id) ? 'Online' : 'Offline'}
+                {isUserOnline(String(selectedUser._id)) ? 'Online' : 'Offline'}
               </p>
             </div>
           </div>

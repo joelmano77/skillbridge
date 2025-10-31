@@ -161,93 +161,103 @@ const MessagingContext = createContext();
 
     // Initialize messaging service
     useEffect(() => {
-      // Connect to messaging service
-      messagingService.connect();
+      // Only connect if user is authenticated
+      if (user && user._id) {
+        // Connect to messaging service
+        messagingService.connect();
 
-      // Set up listeners
-      const unsubscribeMessage = messagingService.onMessage((message) => {
-        dispatch({ type: actionTypes.ADD_MESSAGE, payload: { message } });
+        // Set up listeners
+        const unsubscribeMessage = messagingService.onMessage((message) => {
+          dispatch({ type: actionTypes.ADD_MESSAGE, payload: { message } });
 
-        // Update conversations list with new lastMessage and unreadCount
-        dispatch({
-          type: actionTypes.SET_CONVERSATIONS,
-          payload: state.conversations.map(conversation => {
-            if (conversation._id === message.conversationId) {
-              return {
-                ...conversation,
-                lastMessage: message,
-                unreadCount: conversation.unreadCount + 1
-              };
-            }
-            return conversation;
-          })
+          // Update conversations list with new lastMessage and unreadCount
+          dispatch({
+            type: actionTypes.SET_CONVERSATIONS,
+            payload: state.conversations.map(conversation => {
+              if (conversation._id === message.conversationId) {
+                return {
+                  ...conversation,
+                  lastMessage: message,
+                  unreadCount: conversation.unreadCount + 1
+                };
+              }
+              return conversation;
+            })
+          });
         });
-      });
 
-      const unsubscribeNotification = messagingService.onNotification((notification) => {
-        dispatch({ type: actionTypes.ADD_NOTIFICATION, payload: notification });
-      });
-
-      const unsubscribeUserStatus = messagingService.onUserStatus((userId, isOnline) => {
-        dispatch({
-          type: actionTypes.SET_USER_STATUS,
-          payload: { userId, isOnline },
+        const unsubscribeNotification = messagingService.onNotification((notification) => {
+          dispatch({ type: actionTypes.ADD_NOTIFICATION, payload: notification });
         });
-      });
 
-      // Track connection and authentication status via events instead of polling
-      const handleConnect = () => {
+        const unsubscribeUserStatus = messagingService.onUserStatus((userId, isOnline) => {
+          dispatch({
+            type: actionTypes.SET_USER_STATUS,
+            payload: { userId, isOnline },
+          });
+        });
+
+        // Track connection and authentication status via events instead of polling
+        const handleConnect = () => {
+          dispatch({
+            type: actionTypes.SET_CONNECTED,
+            payload: { isConnected: true, isAuthenticated: messagingService.socket?.authenticated || false },
+          });
+        };
+
+        const handleDisconnect = () => {
+          dispatch({
+            type: actionTypes.SET_CONNECTED,
+            payload: { isConnected: false, isAuthenticated: false },
+          });
+        };
+
+        // Listen for authentication event
+        const handleAuthenticated = () => {
+          dispatch({
+            type: actionTypes.SET_CONNECTED,
+            payload: { isConnected: true, isAuthenticated: true },
+          });
+        };
+
+        // Set initial connection status
         dispatch({
           type: actionTypes.SET_CONNECTED,
-          payload: { isConnected: true, isAuthenticated: messagingService.socket?.authenticated || false },
+          payload: { isConnected: messagingService.isConnected, isAuthenticated: messagingService.socket?.authenticated || false },
         });
-      };
 
-      const handleDisconnect = () => {
+        // Listen for connection changes
+        if (messagingService.socket) {
+          messagingService.socket.on('connect', handleConnect);
+          messagingService.socket.on('disconnect', handleDisconnect);
+          messagingService.socket.on('authenticated', handleAuthenticated);
+        }
+
+        // Cleanup function
+        return () => {
+          unsubscribeMessage();
+          unsubscribeNotification();
+          unsubscribeUserStatus();
+
+          // Remove socket event listeners
+          if (messagingService.socket) {
+            messagingService.socket.off('connect', handleConnect);
+            messagingService.socket.off('disconnect', handleDisconnect);
+            messagingService.socket.off('authenticated', handleAuthenticated);
+          }
+
+          // Disconnect socket when user logs out
+          messagingService.disconnect();
+        };
+      } else {
+        // User not authenticated, disconnect socket
+        messagingService.disconnect();
         dispatch({
           type: actionTypes.SET_CONNECTED,
           payload: { isConnected: false, isAuthenticated: false },
         });
-      };
-
-      // Listen for authentication event
-      const handleAuthenticated = () => {
-        dispatch({
-          type: actionTypes.SET_CONNECTED,
-          payload: { isConnected: true, isAuthenticated: true },
-        });
-      };
-
-      // Set initial connection status
-      dispatch({
-        type: actionTypes.SET_CONNECTED,
-        payload: { isConnected: messagingService.isConnected, isAuthenticated: messagingService.socket?.authenticated || false },
-      });
-
-      // Listen for connection changes
-      if (messagingService.socket) {
-        messagingService.socket.on('connect', handleConnect);
-        messagingService.socket.on('disconnect', handleDisconnect);
-        messagingService.socket.on('authenticated', handleAuthenticated);
       }
-
-      // Cleanup
-      return () => {  
-        unsubscribeMessage();
-        unsubscribeNotification();
-        unsubscribeUserStatus();
-        
-        // Remove socket event listeners
-        if (messagingService.socket) {
-          messagingService.socket.off('connect', handleConnect);
-          messagingService.socket.off('disconnect', handleDisconnect);
-          messagingService.socket.off('authenticated', handleAuthenticated);
-        }
-        
-        // Do not disconnect socket on unmount to prevent disconnect/reconnect loops
-        // messagingService.disconnect();
-      };
-    }, []);
+    }, [user]); // Depend on user to reconnect when user changes
 
     // Actions - Memoized to prevent infinite re-renders
     const loadConversations = useCallback(async () => {
@@ -289,6 +299,11 @@ const MessagingContext = createContext();
     }, [state.connectedUsers]);
 
     const loadConversation = useCallback(async (userId) => {
+      if (!user || !user._id) {
+        console.warn('Cannot load conversation: User not authenticated');
+        return;
+      }
+
       dispatch({ type: actionTypes.SET_LOADING, payload: true });
       try {
         const response = await messagingService.getConversation(userId);
@@ -306,7 +321,7 @@ const MessagingContext = createContext();
       } catch (error) {
         dispatch({ type: actionTypes.SET_ERROR, payload: error.message });
       }
-    }, [user._id]);
+    }, [user]);
 
     const setActiveConversation = useCallback((conversation) => {
       dispatch({ type: actionTypes.SET_ACTIVE_CONVERSATION, payload: conversation });
@@ -322,6 +337,11 @@ const MessagingContext = createContext();
     }, []);
 
     const sendMessage = useCallback((receiverId, content, messageType = 'text') => {
+      if (!user || !user._id) {
+        console.warn('Cannot send message: User not authenticated');
+        return;
+      }
+
       if (!messagingService.socket || !messagingService.isConnected || !messagingService.socket.authenticated) {
         console.warn('⚠️ Cannot send message: Socket not connected or authenticated');
         return;
@@ -343,7 +363,7 @@ const MessagingContext = createContext();
         payload: { message: tempMessage },
       });
       messagingService.sendMessage(receiverId, content, messageType);
-    }, [user._id, dispatch]);
+    }, [user, dispatch]);
 
     const setTyping = useCallback((receiverId, isTyping) => {
       messagingService.setTyping(receiverId, isTyping);

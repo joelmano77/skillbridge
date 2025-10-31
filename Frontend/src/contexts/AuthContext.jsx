@@ -20,14 +20,22 @@ export function AuthProvider({ children }) {
             const currentUser = await authService.getCurrentUser();
             if (currentUser) {
               setUser(currentUser);
+            } else {
+              // Backend returned null, clear local user
+              setUser(null);
             }
           } catch (error) {
             console.log('Could not verify user with backend:', error.message);
-            // Keep the local user data, backend might be down
+            // If backend is unreachable, keep local user for offline functionality
+            // but don't set user if auth failed
+            if (error.message && error.message.includes('Not authorized')) {
+              setUser(null);
+            }
           }
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
+        setUser(null);
       } finally {
         setIsLoading(false);
       }

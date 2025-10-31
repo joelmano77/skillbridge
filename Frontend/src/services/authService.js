@@ -90,7 +90,7 @@ class AuthService {
 
     try {
       const response = await this.makeRequest('/api/auth/me');
-      
+
       if (response.success) {
         this.user = response.user;
         localStorage.setItem('user', JSON.stringify(this.user));
@@ -102,8 +102,13 @@ class AuthService {
       return null;
     } catch (error) {
       console.error('Get current user error:', error);
-      this.logout();
-      return null;
+      // If it's an auth error, log out
+      if (error.message && error.message.includes('Not authorized')) {
+        this.logout();
+        return null;
+      }
+      // For other errors (network, server), return the local user
+      return this.user;
     }
   }
 

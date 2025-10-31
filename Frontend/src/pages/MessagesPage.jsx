@@ -7,7 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 const MessagesPage = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showConversations, setShowConversations] = useState(true);
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   const handleSelectUser = (user) => {
     setSelectedUser(user);
@@ -19,7 +19,7 @@ const MessagesPage = () => {
     setSelectedUser(null);
   };
 
-  if (!user) {
+  if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -42,7 +42,7 @@ const MessagesPage = () => {
           <div className={`${
             showConversations ? 'block' : 'hidden lg:block'
           } w-full lg:w-80 flex-shrink-0`}>
-            <ConversationList 
+            <ConversationList
               onSelectUser={handleSelectUser}
               selectedUser={selectedUser}
             />
@@ -52,7 +52,7 @@ const MessagesPage = () => {
           <div className={`${
             !showConversations || selectedUser ? 'block' : 'hidden lg:block'
           } flex-1`}>
-            <MessagingInterface 
+            <MessagingInterface
               selectedUser={selectedUser}
               onBack={handleBackToConversations}
             />

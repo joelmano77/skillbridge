@@ -33,10 +33,17 @@ function App() {
           const currentUser = await authService.getCurrentUser()
           if (currentUser) {
             setUser(currentUser)
+          } else {
+            // Backend verification failed, clear user
+            setUser(null)
           }
         } catch (error) {
           console.log('Could not verify user with backend:', error.message)
-          // Keep the local user data, backend might be down
+          // If it's an auth error, clear user
+          if (error.message && error.message.includes('Not authorized')) {
+            setUser(null)
+          }
+          // For network errors, keep local user but mark as potentially stale
         }
       }
       setIsLoading(false)
