@@ -22,14 +22,14 @@ const sendOTPEmail = async (email, otp) => {
     const transporter = createTransporter();
 
     const mailOptions = {
-      from: process.env.FROM_EMAIL || `"NGO Connect" <${process.env.SMTP_USER}>`,
+      from: process.env.FROM_EMAIL || `"SkillBridge" <${process.env.SMTP_USER}>`,
       to: email,
-      subject: 'Password Reset OTP - NGO Connect',
+      subject: 'Password Reset OTP - SkillBridge',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #dc2626;">Password Reset Request</h2>
           <p>Hello,</p>
-          <p>You have requested to reset your password for your NGO Connect account.</p>
+          <p>You have requested to reset your password for your SkillBridge account.</p>
           <p>Your One-Time Password (OTP) is:</p>
           <div style="background-color: #f3f4f6; padding: 20px; text-align: center; margin: 20px 0;">
             <h1 style="color: #dc2626; font-size: 32px; margin: 0; letter-spacing: 5px;">${otp}</h1>
@@ -39,16 +39,16 @@ const sendOTPEmail = async (email, otp) => {
           <p>For security reasons, please do not share this OTP with anyone.</p>
           <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
           <p style="color: #6b7280; font-size: 14px;">
-            This is an automated message from NGO Connect. Please do not reply to this email.
+            This is an automated message from SkillBridge. Please do not reply to this email.
           </p>
         </div>
       `,
       text: `
-        Password Reset Request - NGO Connect
+        Password Reset Request - SkillBridge
 
         Hello,
 
-        You have requested to reset your password for your NGO Connect account.
+        You have requested to reset your password for your SkillBridge account.
 
         Your One-Time Password (OTP) is: ${otp}
 
@@ -58,11 +58,18 @@ const sendOTPEmail = async (email, otp) => {
 
         For security reasons, please do not share this OTP with anyone.
 
-        This is an automated message from NGO Connect. Please do not reply to this email.
+        This is an automated message from SkillBridge. Please do not reply to this email.
       `
     };
 
-    const info = await transporter.sendMail(mailOptions);
+    // Set timeout for email sending (30 seconds)
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Email sending timeout')), 30000);
+    });
+
+    const sendPromise = transporter.sendMail(mailOptions);
+    const info = await Promise.race([sendPromise, timeoutPromise]);
+
     console.log('OTP email sent successfully:', info.messageId);
 
     // For Ethereal (development), log the preview URL
@@ -138,9 +145,9 @@ const sendApplicationNotificationEmail = async (ngoEmail, ngoName, volunteerName
     const transporter = createTransporter();
 
     const mailOptions = {
-      from: process.env.FROM_EMAIL || `"NGO Connect" <${process.env.SMTP_USER}>`,
+      from: process.env.FROM_EMAIL || `"SkillBridge" <${process.env.SMTP_USER}>`,
       to: ngoEmail,
-      subject: 'New Application Received - NGO Connect',
+      subject: 'New Application Received - SkillBridge',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #059669;">New Application Received!</h2>
@@ -150,18 +157,25 @@ const sendApplicationNotificationEmail = async (ngoEmail, ngoName, volunteerName
             <p><strong>Volunteer:</strong> ${volunteerName}</p>
             <p><strong>Opportunity:</strong> ${opportunityTitle}</p>
           </div>
-          <p>Please log in to your NGO Connect dashboard to review the application and contact the volunteer.</p>
-          <p><a href="${process.env.CLIENT_URL || 'http://localhost:5173'}" style="background-color: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px;">Review Application</a></p>
+          <p>Please log in to your SkillBridge dashboard to review the application and contact the volunteer.</p>
+          <p><a href="${process.env.CLIENT_URL || 'https://skillbridge-fpz3.onrender.com'}" style="background-color: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px;">Review Application</a></p>
           <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
           <p style="color: #6b7280; font-size: 14px;">
-            This is an automated message from NGO Connect.
+            This is an automated message from SkillBridge.
           </p>
         </div>
       `,
-      text: `New Application Received - NGO Connect\n\nHello ${ngoName},\n\nGreat news! You have received a new application.\n\nVolunteer: ${volunteerName}\nOpportunity: ${opportunityTitle}\n\nPlease log in to review the application.`
+      text: `New Application Received - SkillBridge\n\nHello ${ngoName},\n\nGreat news! You have received a new application.\n\nVolunteer: ${volunteerName}\nOpportunity: ${opportunityTitle}\n\nPlease log in to review the application.`
     };
 
-    const info = await transporter.sendMail(mailOptions);
+    // Set timeout for email sending (30 seconds)
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Email sending timeout')), 30000);
+    });
+
+    const sendPromise = transporter.sendMail(mailOptions);
+    const info = await Promise.race([sendPromise, timeoutPromise]);
+
     console.log('Application notification email sent successfully:', info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
@@ -186,9 +200,9 @@ const sendStatusUpdateNotificationEmail = async (volunteerEmail, volunteerName, 
     };
 
     const mailOptions = {
-      from: process.env.FROM_EMAIL || `"NGO Connect" <${process.env.SMTP_USER}>`,
+      from: process.env.FROM_EMAIL || `"SkillBridge" <${process.env.SMTP_USER}>`,
       to: volunteerEmail,
-      subject: `Application ${status.charAt(0).toUpperCase() + status.slice(1)} - NGO Connect`,
+      subject: `Application ${status.charAt(0).toUpperCase() + status.slice(1)} - SkillBridge`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: ${statusColors[status] || '#6b7280'};">Application Update</h2>
@@ -199,21 +213,28 @@ const sendStatusUpdateNotificationEmail = async (volunteerEmail, volunteerName, 
             <p><strong>Opportunity:</strong> ${opportunityTitle}</p>
             <p><strong>NGO:</strong> ${ngoName}</p>
           </div>
-          ${status === 'accepted' ? 
-            '<p>The NGO will be in touch with you soon with next steps. You can also message them directly through your dashboard.</p>' : 
-            '<p>Don\'t give up! There are many other opportunities waiting for you on NGO Connect.</p>'
+          ${status === 'accepted' ?
+            '<p>The NGO will be in touch with you soon with next steps. You can also message them directly through your dashboard.</p>' :
+            '<p>Don\'t give up! There are many other opportunities waiting for you on SkillBridge.</p>'
           }
-          <p><a href="${process.env.CLIENT_URL || 'http://localhost:5173'}" style="background-color: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px;">View Dashboard</a></p>
+          <p><a href="${process.env.CLIENT_URL || 'https://skillbridge-fpz3.onrender.com'}" style="background-color: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px;">View Dashboard</a></p>
           <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
           <p style="color: #6b7280; font-size: 14px;">
-            This is an automated message from NGO Connect.
+            This is an automated message from SkillBridge.
           </p>
         </div>
       `,
-      text: `Application ${status} - NGO Connect\n\nHello ${volunteerName},\n\n${statusMessages[status]} for "${opportunityTitle}" by ${ngoName}.\n\nPlease log in to view your dashboard.`
+      text: `Application ${status} - SkillBridge\n\nHello ${volunteerName},\n\n${statusMessages[status]} for "${opportunityTitle}" by ${ngoName}.\n\nPlease log in to view your dashboard.`
     };
 
-    const info = await transporter.sendMail(mailOptions);
+    // Set timeout for email sending (30 seconds)
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Email sending timeout')), 30000);
+    });
+
+    const sendPromise = transporter.sendMail(mailOptions);
+    const info = await Promise.race([sendPromise, timeoutPromise]);
+
     console.log('Status update notification email sent successfully:', info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
@@ -228,9 +249,9 @@ const sendOpportunityMatchNotificationEmail = async (volunteerEmail, volunteerNa
     const transporter = createTransporter();
 
     const mailOptions = {
-      from: process.env.FROM_EMAIL || `"NGO Connect" <${process.env.SMTP_USER}>`,
+      from: process.env.FROM_EMAIL || `"SkillBridge" <${process.env.SMTP_USER}>`,
       to: volunteerEmail,
-      subject: 'Perfect Opportunity Match Found! - NGO Connect',
+      subject: 'Perfect Opportunity Match Found! - SkillBridge',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #7c3aed;">Perfect Match Found!</h2>
@@ -241,17 +262,24 @@ const sendOpportunityMatchNotificationEmail = async (volunteerEmail, volunteerNa
             <p><strong>NGO:</strong> ${ngoName}</p>
           </div>
           <p>This opportunity matches your skills and interests. Don't miss out on this chance to make a difference!</p>
-          <p><a href="${process.env.CLIENT_URL || 'http://localhost:5173'}" style="background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px;">View Opportunity</a></p>
+          <p><a href="${process.env.CLIENT_URL || 'https://skillbridge-fpz3.onrender.com'}" style="background-color: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px;">View Opportunity</a></p>
           <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
           <p style="color: #6b7280; font-size: 14px;">
-            This is an automated message from NGO Connect.
+            This is an automated message from SkillBridge.
           </p>
         </div>
       `,
-      text: `Perfect Opportunity Match Found! - NGO Connect\n\nHello ${volunteerName},\n\nWe found a perfect opportunity for you: "${opportunityTitle}" by ${ngoName}.\n\nPlease log in to view the opportunity.`
+      text: `Perfect Opportunity Match Found! - SkillBridge\n\nHello ${volunteerName},\n\nWe found a perfect opportunity for you: "${opportunityTitle}" by ${ngoName}.\n\nPlease log in to view the opportunity.`
     };
 
-    const info = await transporter.sendMail(mailOptions);
+    // Set timeout for email sending (30 seconds)
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Email sending timeout')), 30000);
+    });
+
+    const sendPromise = transporter.sendMail(mailOptions);
+    const info = await Promise.race([sendPromise, timeoutPromise]);
+
     console.log('Opportunity match notification email sent successfully:', info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
