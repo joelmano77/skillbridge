@@ -15,7 +15,7 @@ services:
       - key: JWT_EXPIRES_IN
         value: 7d
       - key: CLIENT_URL
-        value: https://skillbridge-frontend.vercel.app
+        value: https://skillbridge-frontend.onrender.com
       - key: SMTP_HOST
         value: smtp.gmail.com
       - key: SMTP_PORT
@@ -26,3 +26,11 @@ services:
         value: uonrtturawmovsux
       - key: FROM_EMAIL
         value: ngoconnect506@gmail.com
+  - type: static-site
+    name: skillbridge-frontend
+    rootDir: Frontend
+    buildCommand: npm install && npm run build
+    publishDir: dist
+    envVars:
+      - key: NODE_ENV
+        value: production
