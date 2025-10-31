@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: skillbridge-backend
+    runtime: node
+    rootDir: Backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        value: mongodb+srv://dp:dp0807@skillbridge-cluster.rgajkjf.mongodb.net/ngo-connect?retryWrites=true&w=majority
+      - key: JWT_SECRET
+        value: 1234
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: CLIENT_URL
+        value: https://skillbridge-frontend.vercel.app
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_USER
+        value: ngoconnect506@gmail.com
+      - key: SMTP_PASS
+        value: uonrtturawmovsux
+      - key: FROM_EMAIL
+        value: ngoconnect506@gmail.com
