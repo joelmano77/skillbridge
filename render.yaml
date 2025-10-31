@@ -29,7 +29,7 @@ services:
   - type: static-site
     name: skillbridge-frontend
     rootDir: Frontend
-    buildCommand: npm install && npm run build
+    buildCommand: npm run build
     publishDir: dist
     envVars:
       - key: NODE_ENV
