@@ -66,7 +66,8 @@ app.use(cors({
     const allowedOrigins = [
       process.env.CLIENT_URL || 'http://localhost:5173',
       'http://localhost:5174',  // In case 5173 is busy
-      'http://localhost:5175'   // In case 5174 is busy
+      'http://localhost:5175',  // In case 5174 is busy
+      'https://skillbridge-fpz3.onrender.com'  // Deployed frontend
     ];
     
     if (allowedOrigins.includes(origin)) {
