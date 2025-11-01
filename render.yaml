@@ -15,7 +15,7 @@ services:
       - key: JWT_EXPIRES_IN
         value: 7d
       - key: CLIENT_URL
-        value: https://skillbridge-frontend.onrender.com
+        value: https://skillbridge-fpz3.onrender.com
       - key: SMTP_HOST
         value: smtp.gmail.com
       - key: SMTP_PORT
