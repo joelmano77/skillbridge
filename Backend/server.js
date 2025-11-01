@@ -24,12 +24,24 @@ const io = socketIo(server, {
     origin: function (origin, callback) {
       // Allow requests with no origin
       if (!origin) return callback(null, true);
-      
+
       // Allow localhost on any port during development
       if (origin.match(/^http:\/\/localhost:\d+$/)) {
         return callback(null, true);
       }
-      
+
+      // Allow specific production origins
+      const allowedOrigins = [
+        process.env.CLIENT_URL || 'http://localhost:5173',
+        'http://localhost:5174',  // In case 5173 is busy
+        'http://localhost:5175',  // In case 5174 is busy
+        'https://skillbridge-fpz3.onrender.com'  // Deployed frontend
+      ];
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
       callback(new Error('Not allowed by CORS'));
     },
     methods: ["GET", "POST"],
